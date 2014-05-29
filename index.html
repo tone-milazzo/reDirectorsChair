@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ReDirector's Chair (Beta)</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+
+	<!-- jQuery -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+	<!-- home grown -->
+	<link rel="stylesheet" href="./cs/generatecheck.css">
+	<script src="./js/generatecheck.js"></script>
+
+</head>
+<body>
+	<div class="container">
+		<h1>ReDirector's Chair (Beta)</h1>
+			<h2>by Tone Milazzo</h2>
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs">
+			<li class="active">
+		  		<a id="checktab" href="#check" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
+			 </li>
+			 <li>
+		  		<a id="gentab" href="#generate" data-toggle="tab" onclick="RDC.generate();" data-toggle="popover" data-placement="top" data-content="Generates the .htaccess rules">Generate</a>
+		  	 </li>
+		</ul>
+		<!-- Tab panes -->
+		<div class="tab-content">
+			<div class="tab-pane table-hover active" id="check">
+				<button id="sortbutton" data-toggle="tab" data-toggle="popover" data-placement="left" data-content="Sorts the table alphabetically by 'From'" onclick="RDC.sortTable();">Sort by From</button>
+
+				<button id="helpbutton" onclick="RDC.toggleHelp();" style="float:right;" title="Toggle Help" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-book"></span></button>
+
+				<button id="downloadbutton" onclick="RDC.download();" style="float:right;" data-content="Download as CSV" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-download-alt"></span></button>
+
+				<table class="table table-bordered">
+			  		<thead>
+			  			<tr><th class="removeButtonColumn"></th>
+					  		<th>
+					  			from: <input class="toFromInput" id="fromDomain" type="url" list="fromList" value="http://" onBlur="RDC.checkDomain('fromDomain');" onChange="RDC.checkDomain('fromDomain');" data-toggle="popover" data-placement="top" data-content="Prefixes the paths in this column. If this field is red the URL is invalid, Green is good."/>
+					  			<datalist id="fromList">
+					  			</datalist>
+					  		</th>
+					  		<th class="glyphButtonHolder">
+					  			<button class="reloadbutton" type="button" onClick="RDC.checkFroms();" data-toggle="popover" data-placement="top" data-content="Press to test paths in this column.">
+					  				<span class="glyphicon glyphicon-refresh glyphButton" ></span>
+					  			</button>
+					  		</th>
+					  		<th>
+					  			to: <input class="toFromInput" data-html="true" data-toggle="tooltip"  id="toDomain" type="url" list="toList"  value="http://" onBlur="RDC.PopulateSiteMapList();" onChange="RDC.checkDomain('toDomain');" data-toggle="popover" data-placement="top" data-content="Like from: RDC looks up the sitemap.xml from this URL and populates pulldown for the inputs in this column."/>
+
+					  			<datalist id="toList">
+					  			</datalist>
+
+					  			<datalist id="sitemapList">
+					  			</datalist>
+					  		</th>
+					  		<th class="glyphButtonHolder">
+					  			<button class="reloadbutton"  type="button" onClick="RDC.checkTos();" data-toggle="popover" data-placement="right" data-content="Press to test paths in this column.">
+					  				<span class="glyphicon glyphicon-refresh glyphButton" ></span>
+					  			</button>
+					  		</th>
+					  	</tr>
+				  	</thead>
+				  	<tbody id="tableBody">
+				  	</tbody>
+				  	<tbody id="formpart">
+				  		<tr>
+				  			<td></td>
+				  			<td>
+				  				<textarea autofocus id="fromCell" name="from" class="form-control" onPaste="setTimeout(function(){RDC.FromCellChanged();}, 5);" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain. If a single column of URLS are pasted here it will also parse them into seperate entries of from: urls. If two columns are pasted here it will parse them into seperate entries of from: and to: urls"></textarea>
+				  			</td>
+				  			</td>
+				  			<td>
+							<td>
+								<input id="toCell" list="sitemapList" name="to" class="form-control" type="text" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain.">
+							</td>
+							</td>
+				  			<td>
+						</tr>
+					</tbody>
+				  </table>
+
+		  	</div>
+			<div class="tab-pane" id="generate">
+			</div>
+
+		</div>
+	</div>
+</body>

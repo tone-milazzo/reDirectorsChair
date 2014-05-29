@@ -1,0 +1,55 @@
+span.glyphButton{
+	float: right;
+	cursor: pointer;
+}
+
+span.glyphicon-minus{
+	margin: 0px auto 0px auto;
+}
+
+span.glyphicon-link{
+	margin: 6px auto 0px auto;
+}
+
+textarea#fromCell{
+	resize: none;
+	height: 34px;
+}
+
+span.delete{
+	position:relative;
+	top: 7px;
+}
+
+span.tocode, span.fromcode{
+}
+
+th.glyphButtonHolder{
+	width: 60px;
+	text-align: center;
+}
+th.glyphButtonHolder span{
+	margin: 0px 10px;
+}
+
+input.toFromInput{
+	width: 87%;
+}
+
+input#toDomain{
+	position: relative;
+	left: 10px;
+}
+
+th.removeButtonColumn{
+	width:  1em;
+}
+
+input.form-control{
+	width: 95%;
+	float: left;
+}
+
+button.alert-warning, button.alert-danger, button.alert-success{
+	margin: 3px 0px 0px 5px;
+}
