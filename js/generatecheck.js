@@ -24,10 +24,11 @@ function RDCLine(from, to){
 }
 
 function ReDirectCheck(){
-	this.lines = new Array(); //line data
-	this.fromURLS = new Array(); //for the datalist
-	this.toURLS = new Array(); //for the datalist
+	this.lines = new Array(); // line data
+	this.fromURLS = new Array(); // for the datalist
+	this.toURLS = new Array(); // for the datalist
 	this.helpOpen = false;
+	this.toSiteMap = new Array(); // to check if the new rules are substrings of current urls
 	this.codeDef = {"null":"Server Not Found","100":"Continue","101":"Switching Protocols","200":"OK. The request has succeeded.","201":"Created","202":"Accepted","203":"Non-Authoritative Information","204":"No Content","205":"Reset Content","206":"Partial Content","300":"Multiple Choices","301":"Moved Permanently Path: ","302":"Found","303":"See Other","304":"Not Modified","305":"Use Proxy","306":"(Unused)","307":"Temporary Redirect","400":"Bad Request","401":"Unauthorized","402":"Payment Required","403":"Forbidden","404":"Not Found. The server has not found anything matching the Request-URI.","405":"Method Not Allowed","406":"Not Acceptable","407":"Proxy Authentication Required","408":"Request Timeout","409":"Conflict","410":"Gone","411":"Length Required","412":"Precondition Failed","413":"Request Entity Too Large","414":"Request-URI Too Long","415":"Unsupported Media Type","416":"Requested Range Not Satisfiable","417":"Expectation Failed","500":"Internal Server Error","501":"Not Implemented","502":"Bad Gateway","503":"Service Unavailable","504":"Gateway Timeout","505":"HTTP Version Not Supported","default":"(unknown code)"};
 }
 
@@ -102,6 +103,8 @@ ReDirectCheck.prototype.drawTable = function(){
 	var tableInnerds = "";
 
 	for(var i = 0; i< this.lines.length; ++i){
+		if(this.lines[i].deleted == true)
+			continue;
 		tableInnerds += '<tr title="' + i + '" id="row' + i + '" data-html="true" data-toggle="tooltip" data-placement="left">' +
 			'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
 			'<td><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeypress="RDC.updateFrom(' + i + ', this);">' +
@@ -460,26 +463,28 @@ ReDirectCheck.prototype.PopulateSiteMapList = function(){
 	$.get("getsitemap.php", {"url": thisurl }, function(data){
 		$("#toDomain").removeClass("alert-warning");
 		$("#toDomain").prop("title", "");
-		var urls = JSON.parse(data);
+		RDC.toSiteMap = JSON.parse(data);
 		var datalist = $("#sitemapList");
 
-		urls.sort();
+		RDC.toSiteMap.sort();
 
 		// write to html
 		datalist.empty();
 	    // Create options for the Model comboBox.
-	    for(var i=0; i < urls.length; i++) {
+	    for(var i=0; i < RDC.toSiteMap.length; i++) {
 	    	var path;
 
 	    	//strip domains
-	    	if(urls[i].match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/) != null){
-				path = urls[i].match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/)[0];
+	    	if(RDC.toSiteMap[i].match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/) != null){
+				path = RDC.toSiteMap[i].match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/)[0];
 			}else{
 				path = "";
 			}
-			urls[i] = urls[i].replace(path,"");
-	        datalist.append("<option value='" + urls[i] + "'>");
+			RDC.toSiteMap[i] = RDC.toSiteMap[i].replace(path,"");
+	        datalist.append("<option value='" + RDC.toSiteMap[i] + "'>");
 	    }
+	    //RDC.toSiteMap = urls.slice(0);
+	    console.log(RDC.toSiteMap.length);
 	});
 	this.checkDomain("toDomain");
 }
@@ -522,6 +527,20 @@ ReDirectCheck.prototype.generate = function(){
 			if(this.lines[j].deleted == true)
 				continue;
 			if(this.lines[j].from.indexOf(this.lines[i].from) == 0){
+				substring = true;
+				break;
+			}
+		}
+		// all from paths less than 4 characters long are considered substrings
+		if(this.lines[i].from.length < 5){
+			console.log(this.lines[i].from);
+			substring = true;
+		}
+		//also check against sitemap
+		for(var j = 0; j < this.toSiteMap.length; ++j){
+			if(this.lines[i].deleted == true)
+				continue;
+			if(this.toSiteMap[j].indexOf(this.lines[i].from) == 0){
 				substring = true;
 				break;
 			}
@@ -595,7 +614,7 @@ ReDirectCheck.prototype.toggleHelp = function(){
 
 
 ReDirectCheck.prototype.download = function(){
-	var output = "";
+	var output = "\n";
 	for( var i = 0; i < this.lines.length; ++i){
 		output += $("#fromDomain").val() + this.lines[i].from + "," + $("#toDomain").val() + this.lines[i].to + "\n";
 	}
