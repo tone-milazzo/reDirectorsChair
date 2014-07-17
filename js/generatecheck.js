@@ -213,60 +213,7 @@ ReDirectCheck.prototype.checkFrom = function(index){
 		var codeDef;
 		var codeCondition;
 
-		switch (results['code']){
-			case "null":
-			case "400":
-			case "401":
-			case "402":
-			case "403":
-			case "404":
-			case "405":
-			case "406":
-			case "407":
-			case "408":
-			case "409":
-			case "410":
-			case "411":
-			case "412":
-			case "413":
-			case "414":
-			case "415":
-			case "416":
-			case "417":
-				codeCondition = "alert-success";
-				break;
-			case "100":
-			case "101":
-			case "500":
-			case "501":
-			case "502":
-			case "503":
-			case "504":
-			case "505":
-				codeCondition = "alert-warning";
-				break;
-			case "200":
-			case "201":
-			case "202":
-			case "203":
-			case "204":
-			case "205":
-			case "206":
-			case "300":
-			case "301":
-			case "302":
-			case "303":
-			case "304":
-			case "305":
-			case "306":
-			case "307":
-				codeCondition = "alert-danger";
-				break;
-			default:
-				codeCondition = "alert-danger";
-				break;
-		}
-
+		codeCondition = RDC.CodeCondition(results['code']);
 
 		$("#fromcode"+index).html('<button class="' + codeCondition + '" type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="' + RDC.codeDef[results['code']]  + results['note'] + '" onclick="RDC.checkFrom(' + index + ')">' + results['code'] + '</button>');
 		$("#fromcode"+index).children("button").tooltip();
@@ -291,59 +238,8 @@ ReDirectCheck.prototype.checkTo = function(index){
 		var codeDef;
 		var codeCondition;
 
-		switch (results['code']){
-			case "null":
-			case "400":
-			case "401":
-			case "402":
-			case "403":
-			case "404":
-			case "405":
-			case "406":
-			case "407":
-			case "408":
-			case "409":
-			case "410":
-			case "411":
-			case "412":
-			case "413":
-			case "414":
-			case "415":
-			case "416":
-			case "417":
-				codeCondition = "alert-danger";
-				break;
-			case "100":
-			case "101":
-			case "500":
-			case "501":
-			case "502":
-			case "503":
-			case "504":
-			case "505":
-				codeCondition = "alert-warning";
-				break;
-			case "200":
-			case "201":
-			case "202":
-			case "203":
-			case "204":
-			case "205":
-			case "206":
-			case "300":
-			case "301":
-			case "302":
-			case "303":
-			case "304":
-			case "305":
-			case "306":
-			case "307":
-				codeCondition = "alert-success";
-				break;
-			default:
-				codeCondition = "alert-danger";
-				break;
-		}
+
+		codeCondition = RDC.CodeCondition(results['code']);
 
 		$("#tocode"+index).html('<button class="' + codeCondition + '" type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="' + RDC.codeDef[results['code']] + results['note'] + '" onclick="RDC.checkTo(' + index + ')">' + results['code'] + '</button>');
 		$("#tocode"+index).children("button").tooltip();
@@ -394,59 +290,7 @@ ReDirectCheck.prototype.checkDomain = function(input){
 		var codeDef;
 		var codeCondition;
 
-		switch (results['code']){
-			case "null":
-			case "400":
-			case "401":
-			case "402":
-			case "403":
-			case "404":
-			case "405":
-			case "406":
-			case "407":
-			case "408":
-			case "409":
-			case "410":
-			case "411":
-			case "412":
-			case "413":
-			case "414":
-			case "415":
-			case "416":
-			case "417":
-				codeCondition = "alert-danger";
-				break;
-			case "100":
-			case "101":
-			case "500":
-			case "501":
-			case "502":
-			case "503":
-			case "504":
-			case "505":
-				codeCondition = "alert-warning";
-				break;
-			case "200":
-			case "201":
-			case "202":
-			case "203":
-			case "204":
-			case "205":
-			case "206":
-			case "300":
-			case "301":
-			case "302":
-			case "303":
-			case "304":
-			case "305":
-			case "306":
-			case "307":
-				codeCondition = "alert-success";
-				break;
-			default:
-				codeCondition = "alert-danger";
-				break;
-		}
+		codeCondition = RDC.CodeCondition(results['code']);
 
 		$("#"+input).addClass(codeCondition);
 
@@ -455,6 +299,65 @@ ReDirectCheck.prototype.checkDomain = function(input){
 		$("#"+input).tooltip();
 	});
 }
+
+
+ReDirectCheck.prototype.CodeCondition = function(code){
+	switch (code){
+		case "null":
+		case "400":
+		case "401":
+		case "402":
+		case "403":
+		case "404":
+		case "405":
+		case "406":
+		case "407":
+		case "408":
+		case "409":
+		case "410":
+		case "411":
+		case "412":
+		case "413":
+		case "414":
+		case "415":
+		case "416":
+		case "417":
+			return "alert-danger";
+			break;
+		case "100":
+		case "101":
+		case "500":
+		case "501":
+		case "502":
+		case "503":
+		case "504":
+		case "505":
+			return "alert-warning";
+			break;
+		case "200":
+		case "201":
+		case "202":
+		case "203":
+		case "204":
+		case "205":
+		case "206":
+		case "300":
+		case "301":
+		case "302":
+		case "303":
+		case "304":
+		case "305":
+		case "306":
+		case "307":
+			return "alert-success";
+			break;
+		default:
+			return "alert-danger";
+			break;
+	}
+}
+
+
 
 ReDirectCheck.prototype.PopulateSiteMapList = function(){
 	var thisurl = $("#toDomain").val() + "/sitemap.xml";
@@ -515,6 +418,14 @@ ReDirectCheck.prototype.sortTable = function(){
 	  });
 }
 
+
+ReDirectCheck.prototype.copyDomain = function(){
+	$("#toDomain").val($("#fromDomain").val());
+	this.checkDomain('toDomain');
+	this.PopulateSiteMapList();
+}
+
+
 ReDirectCheck.prototype.generate = function(){
 	var innards = "# The RewriteEngine On directive only needs to appear once, not once per redirect\nRewriteEngine On\n";
 	for(var i = 0; i < this.lines.length; ++i){
@@ -557,6 +468,18 @@ ReDirectCheck.prototype.generate = function(){
 }
 
 
+ReDirectCheck.prototype.csv = function(){
+	var innards = "";
+	for(var i = 0; i < this.lines.length; ++i){
+		if(this.lines[i].deleted == true)
+			continue;
+		innards += $("#fromDomain").val() + this.lines[i].from + "," + $("#toDomain").val() + this.lines[i].to +"\n";
+
+	}
+	$("#csv").html("<pre>" + innards + "</pre>");
+}
+
+
 ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
 	// First figure out if we need mod_rewrite or not
 	var buffer = "";
@@ -589,6 +512,7 @@ ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
 ReDirectCheck.prototype.toggleHelp = function(){
 	if( this.helpOpen == true){
 		$('#checktab').popover('hide');
+		$('#csvtab').popover('hide');
 		$('#gentab').popover('hide');
 		$('#sortbutton').popover('hide');
 		$('#fromDomain').popover('hide');
@@ -596,10 +520,10 @@ ReDirectCheck.prototype.toggleHelp = function(){
 		$('.reloadbutton').popover('hide');
 		$('#fromCell').popover('hide');
 		$('#toCell').popover('hide');
-		$('#downloadbutton').popover('hide');
 		this.helpOpen = false;
 	}else{
 		$('#checktab').popover('show');
+		$('#csvtab').popover('show');
 		$('#gentab').popover('show');
 		$('#sortbutton').popover('show');
 		$('#fromDomain').popover('show');
@@ -610,13 +534,4 @@ ReDirectCheck.prototype.toggleHelp = function(){
 		$('#downloadbutton').popover('show');
 		this.helpOpen = true;
 	}
-}
-
-
-ReDirectCheck.prototype.download = function(){
-	var output = "\n";
-	for( var i = 0; i < this.lines.length; ++i){
-		output += $("#fromDomain").val() + this.lines[i].from + "," + $("#toDomain").val() + this.lines[i].to + "\n";
-	}
-	window.open('data:text/html;charset=utf-8,' + encodeURIComponent( output ));
 }

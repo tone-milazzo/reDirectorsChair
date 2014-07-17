@@ -32,6 +32,9 @@
 		  		<a id="checktab" href="#check" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
 			 </li>
 			 <li>
+		  		<a id="csvtab" href="#csv" data-toggle="tab" onclick="RDC.csv();" data-toggle="popover" data-placement="top" data-content="Outputs as CSV">CSV</a>
+		  	 </li>
+			 <li>
 		  		<a id="gentab" href="#generate" data-toggle="tab" onclick="RDC.generate();" data-toggle="popover" data-placement="top" data-content="Generates the .htaccess rules">Generate</a>
 		  	 </li>
 		</ul>
@@ -40,9 +43,9 @@
 			<div class="tab-pane table-hover active" id="check">
 				<button id="sortbutton" data-toggle="tab" data-toggle="popover" data-placement="left" data-content="Sorts the table alphabetically by 'From'" onclick="RDC.sortTable();">Sort by From</button>
 
-				<button id="helpbutton" onclick="RDC.toggleHelp();" style="float:right;" title="Toggle Help" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-book"></span></button>
+				<button id="copydomain" onclick="RDC.copyDomain();" title="Toggle Help" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-chevron-right"></span></button>
 
-				<button id="downloadbutton" onclick="RDC.download();" style="float:right;" data-content="Download as CSV" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-download-alt"></span></button>
+				<button id="helpbutton" onclick="RDC.toggleHelp();" title="Toggle Help" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-book"></span></button>
 
 				<table class="table table-bordered">
 			  		<thead>
@@ -93,6 +96,8 @@
 				  </table>
 
 		  	</div>
+		  	<div class="tab-pane" id="csv">
+			</div>
 			<div class="tab-pane" id="generate">
 			</div>
 
