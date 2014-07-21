@@ -65,3 +65,7 @@ button#copydomain{
 datalist#sitemapList option{
 	width: 300px;
 }
+
+div.popover-content{
+	width: 150px;
+}

@@ -29,10 +29,10 @@
 		<!-- Nav tabs -->
 		<ul class="nav nav-tabs">
 			<li class="active">
-		  		<a id="checktab" href="#check" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
+		  		<a id="checktab" href="#check" data-toggle="tab" onclick="RDC.closeHelp();" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
 			 </li>
 			 <li>
-		  		<a id="csvtab" href="#csv" data-toggle="tab" onclick="RDC.csv();" data-toggle="popover" data-placement="top" data-content="Outputs as CSV">CSV</a>
+		  		<a id="csvtab" href="#csv" data-toggle="tab" onclick="RDC.csv();" data-toggle="popover" data-placement="bottom" data-content="Outputs as CSV">CSV</a>
 		  	 </li>
 			 <li>
 		  		<a id="gentab" href="#generate" data-toggle="tab" onclick="RDC.generate();" data-toggle="popover" data-placement="top" data-content="Generates the .htaccess rules">Generate</a>
@@ -70,7 +70,7 @@
 					  			</datalist>
 					  		</th>
 					  		<th class="glyphButtonHolder">
-					  			<button class="reloadbutton"  type="button" onClick="RDC.checkTos();" data-toggle="popover" data-placement="right" data-content="Press to test paths in this column.">
+					  			<button class="reloadbutton"  type="button" onClick="RDC.checkTos();" data-toggle="popover" data-placement="bottom" data-content="Press to test paths in this column.">
 					  				<span class="glyphicon glyphicon-refresh glyphButton" ></span>
 					  			</button>
 					  		</th>

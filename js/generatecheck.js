@@ -465,6 +465,8 @@ ReDirectCheck.prototype.generate = function(){
 		}
 	}
 	$("#generate").html("<pre>" + innards + "</pre>");
+	//in case someone left them open
+	this.closeHelp();
 }
 
 
@@ -477,6 +479,8 @@ ReDirectCheck.prototype.csv = function(){
 
 	}
 	$("#csv").html("<pre>" + innards + "</pre>");
+	//in case someone left them open
+	this.closeHelp();
 }
 
 
@@ -511,27 +515,36 @@ ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
 
 ReDirectCheck.prototype.toggleHelp = function(){
 	if( this.helpOpen == true){
-		$('#checktab').popover('hide');
-		$('#csvtab').popover('hide');
-		$('#gentab').popover('hide');
-		$('#sortbutton').popover('hide');
-		$('#fromDomain').popover('hide');
-		$('#toDomain').popover('hide');
-		$('.reloadbutton').popover('hide');
-		$('#fromCell').popover('hide');
-		$('#toCell').popover('hide');
+		this.closeHelp();
 		this.helpOpen = false;
 	}else{
-		$('#checktab').popover('show');
-		$('#csvtab').popover('show');
-		$('#gentab').popover('show');
-		$('#sortbutton').popover('show');
-		$('#fromDomain').popover('show');
-		$('#toDomain').popover('show');
-		$('.reloadbutton').popover('show');
-		$('#fromCell').popover('show');
-		$('#toCell').popover('show');
-		$('#downloadbutton').popover('show');
+		this.openHelp();
 		this.helpOpen = true;
 	}
+}
+
+
+ReDirectCheck.prototype.openHelp = function(){
+	$('#checktab').popover('show');
+	$('#csvtab').popover('show');
+	$('#gentab').popover('show');
+	$('#sortbutton').popover('show');
+	$('#fromDomain').popover('show');
+	$('#toDomain').popover('show');
+	$('.reloadbutton').popover('show');
+	$('#fromCell').popover('show');
+	$('#toCell').popover('show');
+	$('#downloadbutton').popover('show');
+}
+
+ReDirectCheck.prototype.closeHelp = function(){
+	$('#checktab').popover('hide');
+	$('#csvtab').popover('hide');
+	$('#gentab').popover('hide');
+	$('#sortbutton').popover('hide');
+	$('#fromDomain').popover('hide');
+	$('#toDomain').popover('hide');
+	$('.reloadbutton').popover('hide');
+	$('#fromCell').popover('hide');
+	$('#toCell').popover('hide');
 }
