@@ -107,13 +107,13 @@ ReDirectCheck.prototype.drawTable = function(){
 			continue;
 		tableInnerds += '<tr title="' + i + '" id="row' + i + '" data-html="true" data-toggle="tooltip" data-placement="left">' +
 			'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
-			'<td><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeypress="RDC.updateFrom(' + i + ', this);">' +
+			'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeypress="RDC.updateFrom(' + i + ', this);">' +
 			'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'from\');"></span>' +
-			'</td><td id="fromcode' + i + '"></td>' +
-		'<td><input name="to" class="form-control to" type="text" list="sitemapList" value="' + this.lines[i].to + '" onkeypress="RDC.updateTo(' + i + ', this);" onchange="RDC.updateTo(' + i + ', this);">' +
-		'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'to\');"></span>' +
-			'</td><td id="tocode' + i + '"></td>' +
-		'</tr>';
+			'</td><td id="fromcode' + i + '" class="removable"></td>' +
+			'<td class="removable"><input name="to" class="form-control to" type="text" list="sitemapList" value="' + this.lines[i].to + '" onkeypress="RDC.updateTo(' + i + ', this);" onchange="RDC.updateTo(' + i + ', this);">' +
+			'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'to\');"></span>' +
+			'</td><td id="tocode' + i + '" class="removable"></td>' +
+			'</tr>';
 	}
 	table.innerHTML = tableInnerds;
 	$("#fromCell").focus();
@@ -122,7 +122,31 @@ ReDirectCheck.prototype.drawTable = function(){
 
 ReDirectCheck.prototype.deleteRow = function(index){
 	this.lines[index].deleted = true;
-	$("#row" + index).hide();
+	$("#row" + index).children("td.removable").css("display","none");
+	$("#row" + index).css("height","10px");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").removeClass("glyphicon-minus").removeClass("delete").addClass("glyphicon-plus");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-plus").attr("onclick","RDC.restoreRow("+index+")");
+	//popover
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-toggle","popover");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-placement","right");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-trigger","hover");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-content",this.lines[index].from);
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('enable');
+}
+
+ReDirectCheck.prototype.restoreRow = function(index){
+	this.lines[index].deleted = false;
+	$("#row" + index).children("td.removable").css("display","table-cell");
+	$("#row" + index).css("height","51px");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-plus").addClass("glyphicon-minus").addClass("delete").removeClass("glyphicon-plus");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").attr("onclick","RDC.deleteRow("+index+")");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").attr("id","");
+	//popover
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-toggle");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-placement");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-trigger");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-content");
+	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('disable');
 }
 
 ReDirectCheck.prototype.addURL = function(toOrFrom, url){

@@ -4,7 +4,11 @@ span.glyphButton{
 }
 
 span.glyphicon-minus{
-	margin: 0px auto 0px auto;
+	margin: auto;
+}
+
+span.glyphicon-plus{
+	margin: auto;
 }
 
 span.glyphicon-link{
@@ -41,8 +45,9 @@ input#toDomain{
 	left: 10px;
 }
 
-th.removeButtonColumn{
+td.removeButtonColumn{
 	width:  1em;
+	padding: 0px;
 }
 
 input.form-control{
@@ -67,5 +72,9 @@ datalist#sitemapList option{
 }
 
 div.popover-content{
-	width: 150px;
+	max-width: 150px;
+}
+
+table.table tr{
+	height: 51px;
 }
