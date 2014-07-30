@@ -299,6 +299,10 @@ ReDirectCheck.prototype.openInNewPage = function(index, toOrFrom){
 
 
 ReDirectCheck.prototype.checkDomain = function(input){
+
+	//in case someone left them open
+	this.closeHelp();
+
 	var thisurl = $("#"+input).val();
 
 	//remove slash if needed
@@ -384,6 +388,9 @@ ReDirectCheck.prototype.CodeCondition = function(code){
 
 
 ReDirectCheck.prototype.PopulateSiteMapList = function(){
+	//in case someone left them open
+	this.closeHelp();
+
 	var thisurl = $("#toDomain").val() + "/sitemap.xml";
 	$("#toDomain").addClass("alert-warning");
 	$("#toDomain").prop("title", thisurl + "  sitemap loading");
@@ -451,6 +458,9 @@ ReDirectCheck.prototype.copyDomain = function(){
 
 
 ReDirectCheck.prototype.generate = function(){
+	//in case someone left them open
+	this.closeHelp();
+
 	var innards = "# The RewriteEngine On directive only needs to appear once, not once per redirect\nRewriteEngine On\n";
 	for(var i = 0; i < this.lines.length; ++i){
 		if(this.lines[i].deleted == true)
@@ -481,20 +491,19 @@ ReDirectCheck.prototype.generate = function(){
 			}
 		}
 		if(substring == false){
-			//innards += "RewriteRule ^/?" + this.lines[i].from + " \/" + this.lines[i].to + "? [R=301,L]\n";
 			innards += this.rewritesFor(this.lines[i].from, this.lines[i].to);
 		}else{
-			//innards += "RewriteRule ^/?" + this.lines[i].from + "$ \/" + this.lines[i].to + "? [R=301,L]\n";
 			innards += this.rewritesFor(this.lines[i].from + "$", this.lines[i].to);
 		}
 	}
 	$("#generate").html("<pre>" + innards + "</pre>");
-	//in case someone left them open
-	this.closeHelp();
+
 }
 
 
 ReDirectCheck.prototype.csv = function(){
+	//in case someone left them open
+	this.closeHelp();
 	var innards = "";
 	for(var i = 0; i < this.lines.length; ++i){
 		if(this.lines[i].deleted == true)
@@ -503,8 +512,6 @@ ReDirectCheck.prototype.csv = function(){
 
 	}
 	$("#csv").html("<pre>" + innards + "</pre>");
-	//in case someone left them open
-	this.closeHelp();
 }
 
 
@@ -518,7 +525,7 @@ ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
   	dest_url = dest_url.replace(/^\//,'');
 
 	var GMindex = source_url.indexOf('?');
-	if ( GMindex > 0) {
+	if ( GMindex > 0 && source_url.slice((GMindex +1) , source_url.length).length > 0) {
 		// Source url has a query string, need rewrite_cond
 		rewrite_cond = true;
 		buffer += "\nRewriteCond %{QUERY_STRING} " + source_url.slice((GMindex +1) , source_url.length) + "\n";
