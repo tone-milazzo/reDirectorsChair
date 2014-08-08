@@ -301,7 +301,7 @@ ReDirectCheck.prototype.openInNewPage = function(index, toOrFrom){
 ReDirectCheck.prototype.checkDomain = function(input){
 
 	//in case someone left them open
-	this.closeHelp();
+	//this.closeHelp();
 
 	var thisurl = $("#"+input).val();
 
@@ -389,7 +389,7 @@ ReDirectCheck.prototype.CodeCondition = function(code){
 
 ReDirectCheck.prototype.PopulateSiteMapList = function(){
 	//in case someone left them open
-	this.closeHelp();
+	//this.closeHelp();
 
 	var thisurl = $("#toDomain").val() + "/sitemap.xml";
 	$("#toDomain").addClass("alert-warning");
@@ -460,7 +460,7 @@ ReDirectCheck.prototype.copyDomain = function(){
 ReDirectCheck.prototype.generate = function(){
 	//in case someone left them open
 	this.closeHelp();
-
+	this.helpOpen = false;
 	var innards = "# The RewriteEngine On directive only needs to appear once, not once per redirect\nRewriteEngine On\n";
 	for(var i = 0; i < this.lines.length; ++i){
 		if(this.lines[i].deleted == true)
@@ -504,6 +504,7 @@ ReDirectCheck.prototype.generate = function(){
 ReDirectCheck.prototype.csv = function(){
 	//in case someone left them open
 	this.closeHelp();
+	this.helpOpen = false;
 	var innards = "";
 	for(var i = 0; i < this.lines.length; ++i){
 		if(this.lines[i].deleted == true)
