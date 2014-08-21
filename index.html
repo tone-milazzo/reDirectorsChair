@@ -29,39 +29,39 @@
 		<!-- Nav tabs -->
 		<ul class="nav nav-tabs">
 			<li class="active">
-		  		<a id="checktab" href="#check" data-toggle="tab" onclick="RDC.closeHelp();" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
+		  		<a id="checktab" href="#check" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
 			 </li>
 			 <li>
-		  		<a id="csvtab" href="#csv" data-toggle="tab" onclick="RDC.csv();" data-toggle="popover" data-placement="bottom" data-content="Outputs as CSV">CSV</a>
+		  		<a id="csvtab" href="#csv" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="bottom" data-content="Outputs as CSV">CSV</a>
 		  	 </li>
 			 <li>
-		  		<a id="gentab" href="#generate" data-toggle="tab" onclick="RDC.generate();" data-toggle="popover" data-placement="top" data-content="Generates the .htaccess rules">Generate</a>
+		  		<a id="gentab" href="#generate" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="Generates the .htaccess rules">Generate</a>
 		  	 </li>
 		</ul>
 		<!-- Tab panes -->
 		<div class="tab-content">
 			<div class="tab-pane table-hover active" id="check">
-				<button id="sortbutton" data-toggle="tab" data-toggle="popover" data-placement="left" data-content="Sorts the table alphabetically by 'From'" data-container="body" onclick="RDC.sortTable();">Sort by From</button>
+				<button id="sortbutton" data-toggle="tab" data-trigger="manual" data-toggle="popover" data-placement="left" data-content="Sorts the table alphabetically by 'From'" data-container="body">Sort by From</button>
 
-				<button id="copydomain" onclick="RDC.copyDomain();" title="Toggle Help" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-chevron-right"></span></button>
+				<button id="copydomain" title="Toggle Help" data-trigger="manual" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-chevron-right"></span></button>
 
-				<button id="helpbutton" onclick="RDC.toggleHelp();" title="Toggle Help" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-book"></span></button>
+				<button id="helpbutton" title="Toggle Help" data-trigger="manual" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-book"></span></button>
 
 				<table class="table table-bordered">
 			  		<thead>
 			  			<tr><th class="removeButtonColumn"></th>
 					  		<th>
-					  			from: <input class="toFromInput" id="fromDomain" type="url" list="fromList" value="http://" onBlur="RDC.checkDomain('fromDomain');" onChange="RDC.checkDomain('fromDomain');" data-toggle="popover" data-placement="top" data-content="Prefixes the paths in this column. If this field is red the URL is invalid, Green is good."/>
+					  			from: <input class="toFromInput" id="fromDomain" type="url" list="fromList" value="http://" data-trigger="manual" data-toggle="popover" data-placement="top" data-content="Prefixes the paths in this column. If this field is red the URL is invalid, Green is good."/>
 					  			<datalist id="fromList">
 					  			</datalist>
 					  		</th>
 					  		<th class="glyphButtonHolder">
-					  			<button class="reloadbutton" type="button" onClick="RDC.checkFroms();" data-toggle="popover" data-placement="top" data-content="Press to test paths in this column.">
+					  			<button id="fromreloadbutton" type="button" data-trigger="manual" data-toggle="popover" data-placement="top" data-content="Press to test paths in this column.">
 					  				<span class="glyphicon glyphicon-refresh glyphButton" ></span>
 					  			</button>
 					  		</th>
 					  		<th>
-					  			to: <input class="toFromInput" data-html="true" data-toggle="tooltip"  id="toDomain" type="url" list="toList"  value="http://" onBlur="RDC.PopulateSiteMapList();" onChange="RDC.checkDomain('toDomain');" data-toggle="popover" data-placement="top" data-content="Like from: RDC looks up the sitemap.xml from this URL and populates pulldown for the inputs in this column."/>
+					  			to: <input class="toFromInput" data-html="true" data-trigger="manual" data-toggle="tooltip"  id="toDomain" type="url" list="toList"  value="http://" data-toggle="popover" data-placement="top" data-content="Like from: RDC looks up the sitemap.xml from this URL and populates pulldown for the inputs in this column."/>
 
 					  			<datalist id="toList">
 					  			</datalist>
@@ -70,7 +70,7 @@
 					  			</datalist>
 					  		</th>
 					  		<th class="glyphButtonHolder">
-					  			<button class="reloadbutton"  type="button" onClick="RDC.checkTos();" data-toggle="popover" data-placement="bottom" data-content="Press to test paths in this column.">
+					  			<button id="toreloadbutton"  type="button" data-trigger="manual" data-toggle="popover" data-placement="bottom" data-content="Press to test paths in this column.">
 					  				<span class="glyphicon glyphicon-refresh glyphButton" ></span>
 					  			</button>
 					  		</th>
@@ -82,12 +82,12 @@
 				  		<tr>
 				  			<td></td>
 				  			<td>
-				  				<textarea autofocus id="fromCell" name="from" class="form-control" onPaste="setTimeout(function(){RDC.FromCellChanged();}, 5);" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain. If a single column of URLS are pasted here it will also parse them into seperate entries of from: urls. If two columns are pasted here it will parse them into seperate entries of from: and to: urls"></textarea>
+				  				<textarea autofocus id="fromCell" name="from" class="form-control" data-trigger="manual" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain. If a single column of URLS are pasted here it will also parse them into seperate entries of from: urls. If two columns are pasted here it will parse them into seperate entries of from: and to: urls"></textarea>
 				  			</td>
 				  			</td>
 				  			<td>
 							<td>
-								<input id="toCell" list="sitemapList" name="to" class="form-control" type="text" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain.">
+								<input id="toCell" list="sitemapList" name="to" class="form-control" type="text" data-trigger="manual" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain.">
 							</td>
 							</td>
 				  			<td>
