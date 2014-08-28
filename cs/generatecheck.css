@@ -67,14 +67,18 @@ button#copydomain{
 	margin-left: 455px;
 }
 
-datalist#sitemapList option{
-	width: 300px;
-}
-
 div.popover-content{
 	max-width: 150px;
 }
 
 table.table tr{
 	height: 51px;
+}
+
+button#fromreloadbutton, button#toreloadbutton{
+	height: 22px;
+}
+
+input::-webkit-calendar-picker-indicator {
+  display: none;
 }

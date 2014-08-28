@@ -244,7 +244,7 @@ ReDirectCheck.prototype.addURL = function(toOrFrom, url){
 	datalist.empty();
     // Create options for the Model comboBox.
     for(var j=0; j < list.length; j++) {
-        datalist.append("<option value='" + list[j].url + "'>");
+    	datalist.append("<option value='" + list[j].url + "'>");
     }
     if(domain.val().length < 12)
     	domain.val(list[0].url);
@@ -470,7 +470,8 @@ ReDirectCheck.prototype.PopulateSiteMapList = function(){
 				path = "";
 			}
 			RDC.toSiteMap[i] = RDC.toSiteMap[i].replace(path,"");
-	        datalist.append("<option value='" + RDC.toSiteMap[i] + "'>");
+			if(RDC.toSiteMap[i].length > 0)
+	        	datalist.append("<option value='" + RDC.toSiteMap[i] + "'/>");
 	    }
 	    //RDC.toSiteMap = urls.slice(0);
 	});
