@@ -3,6 +3,8 @@ var RDC;
 window.onload = function start(){
 	RDC = new ReDirectCheck();
 	RDC.drawTable();
+	RDC.OpenStorage();
+
 	//  Add listeners
 	$("input#toCell").keyup(function (e) {
 	    if (e.keyCode == 13) {
@@ -39,12 +41,18 @@ window.onload = function start(){
 		RDC.toggleHelp();
 	});
 
+	$("button#clearbutton").click(function(){
+		RDC.ClearStorage();
+	});
+
 	$("input#fromDomain").blur(function(){
 		RDC.checkDomain('fromDomain');
+		RDC.PutInStorage();
 	});
 
 	$("input#fromDomain").change(function(){
 		RDC.checkDomain('fromDomain');
+		RDC.PutInStorage();
 	});
 
 	$("button#fromreloadbutton").click(function(){
@@ -53,10 +61,12 @@ window.onload = function start(){
 
 	$("input#toDomain").blur(function(){
 		RDC.PopulateSiteMapList();
+		RDC.PutInStorage();
 	});
 
 	$("input#toDomain").change(function(){
 		RDC.checkDomain('toDomain');
+		RDC.PutInStorage();
 	});
 
 	$("button#toreloadbutton").click(function(){
@@ -69,6 +79,7 @@ window.onload = function start(){
 }
 
 function RDCLine(from, to){
+	if(to == "") to = "/";
 	this.from = from;
 	this.to = to;
 	this.deleted = false;
@@ -96,7 +107,7 @@ ReDirectCheck.prototype.FromCellChanged = function(){
 	this.drawTable();
 	$("#fromCell").val("");
 	this.checkDomain('fromDomain');
-
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.AddLine = function(from, to){
@@ -124,6 +135,7 @@ ReDirectCheck.prototype.AddLine = function(from, to){
 		return;
 
 	this.lines.push(new RDCLine(from, to));
+	this.PutInStorage();
 	this.addURL("from", fromURL);
 	this.addURL("to", toURL);
 }
@@ -154,20 +166,26 @@ ReDirectCheck.prototype.drawTable = function(){
 	var tableInnerds = "";
 
 	for(var i = 0; i< this.lines.length; ++i){
-		if(this.lines[i].deleted == true)
-			continue;
+		//if(this.lines[i].deleted == true)
+			//continue;
 		tableInnerds += '<tr title="' + i + '" id="row' + i + '" data-html="true" data-toggle="tooltip" data-placement="left">' +
-			'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
-			'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeypress="RDC.updateFrom(' + i + ', this);">' +
-			'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'from\');"></span>' +
-			'</td><td id="fromcode' + i + '" class="removable"></td>' +
-			'<td class="removable"><input name="to" class="form-control to" type="text" list="sitemapList" value="' + this.lines[i].to + '" onkeypress="RDC.updateTo(' + i + ', this);" onchange="RDC.updateTo(' + i + ', this);">' +
-			'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'to\');"></span>' +
-			'</td><td id="tocode' + i + '" class="removable"></td>' +
-			'</tr>';
+		'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
+		'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '"  onblur="RDC.updateFrom(' + i + ', this);">' +
+		'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'from\');"></span>' +
+		'</td><td id="fromcode' + i + '" class="removable"></td>' +
+		'<td class="removable"><input name="to" class="form-control to" type="text" list="sitemapList" value="' + this.lines[i].to + '" onkeypress="RDC.updateTo(' + i + ', this);" onchange="RDC.updateTo(' + i + ', this);">' +
+		'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'to\');"></span>' +
+		'</td><td id="tocode' + i + '" class="removable"></td>' +
+		'</tr>';
 	}
+
 	table.innerHTML = tableInnerds;
 	$("#fromCell").focus();
+	//loop again to delete rows
+	for(var i = 0; i< this.lines.length; ++i){
+		if(this.lines[i].deleted == true)
+			this.deleteRow(i);
+	}
 }
 
 
@@ -183,6 +201,7 @@ ReDirectCheck.prototype.deleteRow = function(index){
 	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-trigger","hover");
 	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-content",this.lines[index].from);
 	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('enable');
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.restoreRow = function(index){
@@ -198,6 +217,7 @@ ReDirectCheck.prototype.restoreRow = function(index){
 	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-trigger");
 	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-content");
 	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('disable');
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.addURL = function(toOrFrom, url){
@@ -313,7 +333,6 @@ ReDirectCheck.prototype.checkTo = function(index){
 		var codeDef;
 		var codeCondition;
 
-
 		codeCondition = RDC.CodeCondition(results['code']);
 
 		$("#tocode"+index).html('<button class="' + codeCondition + '" type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="' + RDC.codeDef[results['code']] + results['note'] + '" onclick="RDC.checkTo(' + index + ')">' + results['code'] + '</button>');
@@ -327,6 +346,7 @@ ReDirectCheck.prototype.updateFrom = function(index, input){
 	}*/
 	this.lines[index].from = input.value;
 	$("#fromcode"+index).html('<button type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Re-test" onclick="RDC.checkFrom(' + index + ')"><span class="glyphicon glyphicon-refresh glyphButton"></button>');
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.updateTo = function(index, input){
@@ -335,6 +355,7 @@ ReDirectCheck.prototype.updateTo = function(index, input){
 	}*/
 	this.lines[index].to = input.value;
 	$("#tocode"+index).html('<button type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Re-test" onclick="RDC.checkTo(' + index + ')"><span class="glyphicon glyphicon-refresh glyphButton"></button>');
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.openInNewPage = function(index, toOrFrom){
@@ -623,6 +644,7 @@ ReDirectCheck.prototype.openHelp = function(){
 	$('#fromCell').popover('show');
 	$('#toCell').popover('show');
 	$('#downloadbutton').popover('show');
+	$('#clearbutton').popover('show');
 }
 
 ReDirectCheck.prototype.closeHelp = function(){
@@ -636,4 +658,31 @@ ReDirectCheck.prototype.closeHelp = function(){
 	$('#toreloadbutton').popover('hide');
 	$('#fromCell').popover('hide');
 	$('#toCell').popover('hide');
+	$('#clearbutton').popover('hide');
+}
+
+
+/* back up functions */
+ReDirectCheck.prototype.PutInStorage = function(){
+	localStorage.lines = JSON.stringify(this.lines);
+	localStorage.from = $("#fromDomain").val();
+	localStorage.to = $("#toDomain").val();
+}
+
+ReDirectCheck.prototype.OpenStorage = function(){
+	if(localStorage.lines != null){
+		this.lines = JSON.parse(localStorage.lines);
+		$("#fromDomain").val(localStorage.from);
+		$("#toDomain").val(localStorage.to);
+		this.drawTable();
+	}
+}
+
+ReDirectCheck.prototype.ClearStorage = function(){
+	delete localStorage.lines;
+	delete this.lines;
+	RDC = new ReDirectCheck();
+	RDC.drawTable();
+	$('#fromDomain').val("http://");
+	$('#toDomain').val("http://");
 }

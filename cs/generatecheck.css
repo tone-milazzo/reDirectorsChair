@@ -59,7 +59,7 @@ button.alert-warning, button.alert-danger, button.alert-success{
 	margin: 3px 0px 0px 5px;
 }
 
-button#helpbutton{
+button#helpbutton, button#clearbutton{
 	float:right;
 }
 
