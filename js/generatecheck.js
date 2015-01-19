@@ -37,6 +37,14 @@ window.onload = function start(){
 		RDC.copyDomain();
 	});
 
+	$("button#copyto").click(function(){
+		RDC.copyTo();
+	});
+
+	$("button#switchDomains").click(function(){
+		RDC.switchDomains();
+	});
+
 	$("button#helpbutton").click(function(){
 		RDC.toggleHelp();
 	});
@@ -170,10 +178,10 @@ ReDirectCheck.prototype.drawTable = function(){
 			//continue;
 		tableInnerds += '<tr title="' + i + '" id="row' + i + '" data-html="true" data-toggle="tooltip" data-placement="left">' +
 		'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
-		'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '"  onblur="RDC.updateFrom(' + i + ', this);">' +
+		'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeyup="RDC.updateFrom(' + i + ', this);" onchange="RDC.updateFrom(' + i + ', this);">' +
 		'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'from\');"></span>' +
 		'</td><td id="fromcode' + i + '" class="removable"></td>' +
-		'<td class="removable"><input name="to" class="form-control to" type="text" list="sitemapList" value="' + this.lines[i].to + '" onkeypress="RDC.updateTo(' + i + ', this);" onchange="RDC.updateTo(' + i + ', this);">' +
+		'<td class="removable"><input name="to" class="form-control to" type="text" list="sitemapList" value="' + this.lines[i].to + '" onkeyup="RDC.updateTo(' + i + ', this);" onchange="RDC.updateTo(' + i + ', this);">' +
 		'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'to\');"></span>' +
 		'</td><td id="tocode' + i + '" class="removable"></td>' +
 		'</tr>';
@@ -341,19 +349,16 @@ ReDirectCheck.prototype.checkTo = function(index){
 }
 
 ReDirectCheck.prototype.updateFrom = function(index, input){
-	/*if(input.value.charAt(0) == '/'){
-		input.value = input.value.slice(1,input.value.length);
-	}*/
+
+	console.log(input.value);
 	this.lines[index].from = input.value;
 	$("#fromcode"+index).html('<button type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Re-test" onclick="RDC.checkFrom(' + index + ')"><span class="glyphicon glyphicon-refresh glyphButton"></button>');
 	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.updateTo = function(index, input){
-	/*if(input.value.charAt(0) == '/'){
-		input.value = input.value.slice(1,input.value.length);
-	}*/
 	this.lines[index].to = input.value;
+	console.log(input.value);
 	$("#tocode"+index).html('<button type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Re-test" onclick="RDC.checkTo(' + index + ')"><span class="glyphicon glyphicon-refresh glyphButton"></button>');
 	this.PutInStorage();
 }
@@ -532,6 +537,20 @@ ReDirectCheck.prototype.copyDomain = function(){
 	this.PopulateSiteMapList();
 }
 
+ReDirectCheck.prototype.copyTo = function(){
+	$("#fromDomain").val($("#toDomain").val());
+	this.checkDomain('fromDomain');
+	this.PopulateSiteMapList();
+}
+
+ReDirectCheck.prototype.switchDomains = function(){
+	var toDomain = $("#toDomain").val();
+	$("#toDomain").val($("#fromDomain").val());
+	$("#fromDomain").val(toDomain);
+	this.checkDomain('fromDomain');
+	this.checkDomain('toDomain');
+	this.PopulateSiteMapList();
+}
 
 ReDirectCheck.prototype.generate = function(){
 	//in case someone left them open
@@ -602,7 +621,7 @@ ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
   	dest_url = dest_url.replace(/^\//,'');
 
 	var GMindex = source_url.indexOf('?');
-	if ( GMindex > 0 && source_url.slice((GMindex +1) , source_url.length).length > 0) {
+	if ( GMindex >= 0 && source_url.slice((GMindex +1) , source_url.length).length > 0) {
 		// Source url has a query string, need rewrite_cond
 		rewrite_cond = true;
 		buffer += "\nRewriteCond %{QUERY_STRING} " + source_url.slice((GMindex +1) , source_url.length) + "\n";
