@@ -11,6 +11,7 @@ window.onload = function start(){
 	        RDC.EnteredToCell();
 	    }
 	});
+
 	$("textarea#fromCell").keyup(function (e) {
 	    if (e.keyCode == 13) {
 	        RDC.EnteredFromCell();
@@ -19,6 +20,10 @@ window.onload = function start(){
 
 	$("a#checktab").click(function(){
 		RDC.closeHelp();
+	});
+
+	$("a#reporttab").click(function(){
+		RDC.report();
 	});
 
 	$("a#csvtab").click(function(){
@@ -84,13 +89,30 @@ window.onload = function start(){
 	$("textarea#fromCell").on("paste", function(){
 		setTimeout(function(){RDC.FromCellChanged();}, 5);
 	});
+
+	// if urls loaded from storage, check them
+	RDC.checkDomain('fromDomain');
+	RDC.checkDomain('toDomain');
+	RDC.PopulateSiteMapList();
 }
 
-function RDCLine(from, to){
+// function RDCLine(from, to){
+// 	if(to == "") to = "/";
+// 	this.from = from;
+// 	this.to = to;
+// 	this.deleted = false;
+// }
+
+function RDCLine(from, to, repeat){
+	this.deleted = false;
 	if(to == "") to = "/";
+	if(repeat != true && repeat != false) repeat = false;
 	this.from = from;
 	this.to = to;
-	this.deleted = false;
+	this.deleted = repeat;
+	this.fromCode = undefined;
+	this.toCode = undefined;
+	//console.log(this.deleted);
 }
 
 function ReDirectCheck(){
@@ -100,17 +122,23 @@ function ReDirectCheck(){
 	this.helpOpen = false;
 	this.toSiteMap = new Array(); // to check if the new rules are substrings of current urls
 	this.codeDef = {"null":"Server Not Found","100":"Continue","101":"Switching Protocols","200":"OK. The request has succeeded.","201":"Created","202":"Accepted","203":"Non-Authoritative Information","204":"No Content","205":"Reset Content","206":"Partial Content","300":"Multiple Choices","301":"Moved Permanently Path: ","302":"Found","303":"See Other","304":"Not Modified","305":"Use Proxy","306":"(Unused)","307":"Temporary Redirect","400":"Bad Request","401":"Unauthorized","402":"Payment Required","403":"Forbidden","404":"Not Found. The server has not found anything matching the Request-URI.","405":"Method Not Allowed","406":"Not Acceptable","407":"Proxy Authentication Required","408":"Request Timeout","409":"Conflict","410":"Gone","411":"Length Required","412":"Precondition Failed","413":"Request Entity Too Large","414":"Request-URI Too Long","415":"Unsupported Media Type","416":"Requested Range Not Satisfiable","417":"Expectation Failed","500":"Internal Server Error","501":"Not Implemented","502":"Bad Gateway","503":"Service Unavailable","504":"Gateway Timeout","505":"HTTP Version Not Supported","default":"(unknown code)"};
+	//for toggling to dev link
+	this.fromLiveURL = "";
+	this.toLiveURL = "";
 }
 
 ReDirectCheck.prototype.FromCellChanged = function(){
 	var FCValue = $("#fromCell").val().toString();
+	//console.log("here " + FCValue);
 	var FCLines;
 	var URLs = new Array();
 
 	FCLines = FCValue.split('\n');
 	for( var i =0 ; i< FCLines.length ; ++i){
 		FCLines[i] = FCLines[i].split(/[\s,\t\n\r]/); //split tabs, commas or spaces
-		this.AddLine(FCLines[i][0], FCLines[i][1]);
+		//TONE
+		this.AddLine(decodeURIComponent(FCLines[i][0]), decodeURIComponent(FCLines[i][1]));
+		//this.AddLine(FCLines[i][0], FCLines[i][1]);
 	}
 	this.drawTable();
 	$("#fromCell").val("");
@@ -121,35 +149,68 @@ ReDirectCheck.prototype.FromCellChanged = function(){
 ReDirectCheck.prototype.AddLine = function(from, to){
 	var fromURL;
 	var toURL;
+	var repeat = false;
 
-	if(to == null){
-		to="";
+	//console.log("AddLine");
+
+	// correct blank tos
+	if(to == null || to == "undefined"){
+		to="/";
 	}
 
+	//pull from base url
 	if(from.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})\//) != null){
 		fromURL = from.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/)[0];
 	}else{
 		fromURL = "";
 	}
-	if(to.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})\//) != null){
+
+	//pull to base url
+	if( to.indexOf("cloudfront") > -1) //keep cloudfront urls
+		toURL = "";
+	else if(to.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})\//) != null){
 		toURL = to.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/)[0];
 	}else{
 		toURL = "";
 	}
+
+	// cut base urls
 	from = from.replace(fromURL,"");
 	to = to.replace(toURL,"");
 
+	// if from and to are the same, skip
 	if(from == to)
 		return;
 
-	this.lines.push(new RDCLine(from, to));
+	// blog links direct to /blog at a minimum
+	if(((from.indexOf("/blog") == 0) && from.length > 5 ) && ((to == "/") || (to == ""))){
+		to = "/blog";
+	}
+
+	// photogallery links direct to /photogallery at a minimum
+	//console.log(from + " " + to);
+	if(((from.indexOf("/photogallery") == 0) && from.length > 13 ) && ((to == "/") || (to == ""))){
+		to = "/photogallery";
+	}
+
+	//If from and to combination already on the list, go ahead and add it but folded up
+	//console.log(" to "+ to);
+	for( var i = 0; i < this.lines.length; ++i){
+		if( this.lines[i].from == from && this.lines[i].to == to){
+			repeat = true; //if the path repeats you must delete
+			break;
+		}
+	}
+
+	//add  line to data
+	this.lines.push(new RDCLine(from, to, repeat));
 	this.PutInStorage();
 	this.addURL("from", fromURL);
 	this.addURL("to", toURL);
 }
 
 ReDirectCheck.prototype.EnteredFromCell = function(){
-	$("#fromCell").val($("#fromCell").val().trim()).toString(); //trim whitespace, but mostly the return at the end
+	$("#fromCell").val($("#fromCell").val().trim()).toString(); //trim whitespace, but mostly the \n at the end
 	$("#toCell").focus();
 }
 
@@ -174,8 +235,6 @@ ReDirectCheck.prototype.drawTable = function(){
 	var tableInnerds = "";
 
 	for(var i = 0; i< this.lines.length; ++i){
-		//if(this.lines[i].deleted == true)
-			//continue;
 		tableInnerds += '<tr title="' + i + '" id="row' + i + '" data-html="true" data-toggle="tooltip" data-placement="left">' +
 		'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
 		'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeyup="RDC.updateFrom(' + i + ', this);" onchange="RDC.updateFrom(' + i + ', this);">' +
@@ -191,6 +250,7 @@ ReDirectCheck.prototype.drawTable = function(){
 	$("#fromCell").focus();
 	//loop again to delete rows
 	for(var i = 0; i< this.lines.length; ++i){
+		//console.log( "loop to delete rows " + i + " = "+this.lines[i].deleted);
 		if(this.lines[i].deleted == true)
 			this.deleteRow(i);
 	}
@@ -198,6 +258,7 @@ ReDirectCheck.prototype.drawTable = function(){
 
 
 ReDirectCheck.prototype.deleteRow = function(index){
+	//console.log( "delete row " + index);
 	this.lines[index].deleted = true;
 	$("#row" + index).children("td.removable").css("display","none");
 	$("#row" + index).css("height","10px");
@@ -320,14 +381,47 @@ ReDirectCheck.prototype.checkFrom = function(index){
 
 		$("#fromcode"+index).html('<button class="' + codeCondition + '" type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="' + RDC.codeDef[results['code']]  + results['note'] + '" onclick="RDC.checkFrom(' + index + ')">' + results['code'] + '</button>');
 		$("#fromcode"+index).children("button").tooltip();
+
+		RDC.lines[index].fromCode = results['code'];
 	});
 }
 
-
 ReDirectCheck.prototype.checkTos = function(){
+	var toUrls = [];
+
+	//pull urls from lines
 	for(var i = 0; i < this.lines.length; ++i){
-		this.checkTo(i);
+		toUrls[i] = this.lines[i].to;
 	}
+	//console.log(toUrls.length);
+
+	//erase copies
+	for(var i = 0; i < toUrls.length; ++i){
+		for(var j = i+1; j < toUrls.length; ++j){
+			if( toUrls[i] == toUrls[j]){
+				toUrls[j] = "";
+			}
+		}
+	}
+	//console.log(toUrls.length);
+
+	//delete blanks
+	for(var i = toUrls.length-1; i >= 0 ; --i){
+		if(toUrls[i] == "" || toUrls[i] == undefined)
+			toUrls.splice(i,1);
+	}
+
+	//clear past results
+	for(var i = 0; i < this.lines.length; ++i){
+		$("#tocode"+i).html('');
+	}
+
+	for(var i = toUrls.length-1; i >= 0 ; --i){
+		//console.log( i + " " + toUrls[i]);
+		this.checkToPath(toUrls[i]);
+	}
+	//console.log(toUrls.length);
+	//this.checkTo(i);
 }
 
 ReDirectCheck.prototype.checkTo = function(index){
@@ -345,12 +439,43 @@ ReDirectCheck.prototype.checkTo = function(index){
 
 		$("#tocode"+index).html('<button class="' + codeCondition + '" type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="' + RDC.codeDef[results['code']] + results['note'] + '" onclick="RDC.checkTo(' + index + ')">' + results['code'] + '</button>');
 		$("#tocode"+index).children("button").tooltip();
+		RDC.lines[index].toCode = results['code'];
+	});
+
+}
+
+ReDirectCheck.prototype.checkToPath = function(path){
+	// if path is complete url the use path, else complete url
+	var thisurl;
+	if(path.indexOf("http") == 0 ){
+		 thisurl = path;
+	}else{
+		thisurl = $("#toDomain").val() + path;
+	}
+
+	// get code for this path
+	$.get("getcode.php", {"url": thisurl }, function(data){
+		var results = JSON.parse(data);
+		var codeDef;
+		var codeCondition;
+
+		codeCondition = RDC.CodeCondition(results['code']);
+
+		//loop over lines array and insert the code for all
+		for(var i = 0; i < RDC.lines.length; ++i){
+			if(RDC.lines[i].to == path){
+				$("#tocode"+i).html('<button class="' + codeCondition + '" type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="' + RDC.codeDef[results['code']] + results['note'] + '" onclick="RDC.checkTo(' + i + ')">' + results['code'] + '</button>');
+				$("#tocode"+i).children("button").tooltip();
+
+				RDC.lines[i].toCode = results['code'];
+			}
+		}
 	});
 }
 
 ReDirectCheck.prototype.updateFrom = function(index, input){
 
-	console.log(input.value);
+	//console.log(input.value);
 	this.lines[index].from = input.value;
 	$("#fromcode"+index).html('<button type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Re-test" onclick="RDC.checkFrom(' + index + ')"><span class="glyphicon glyphicon-refresh glyphButton"></button>');
 	this.PutInStorage();
@@ -358,7 +483,7 @@ ReDirectCheck.prototype.updateFrom = function(index, input){
 
 ReDirectCheck.prototype.updateTo = function(index, input){
 	this.lines[index].to = input.value;
-	console.log(input.value);
+	//console.log(input.value);
 	$("#tocode"+index).html('<button type="button" data-html="true" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Re-test" onclick="RDC.checkTo(' + index + ')"><span class="glyphicon glyphicon-refresh glyphButton"></button>');
 	this.PutInStorage();
 }
@@ -378,11 +503,18 @@ ReDirectCheck.prototype.openInNewPage = function(index, toOrFrom){
 ReDirectCheck.prototype.checkDomain = function(input){
 
 	//in case someone left them open
-	//this.closeHelp();
 	this.closeHelp();
 	this.helpOpen = false;
 
 	var thisurl = $("#"+input).val();
+
+	// no url? clear display
+	if((thisurl == "http://")||(thisurl == "https://")){
+		$("#"+input).removeClass("alert-danger");
+		$("#"+input).removeClass("alert-warning");
+		$("#"+input).removeClass("alert-success");
+		return;
+	}
 
 	//remove slash if needed
 	thisurl = thisurl.replace(/\/$/,'');
@@ -535,12 +667,14 @@ ReDirectCheck.prototype.copyDomain = function(){
 	$("#toDomain").val($("#fromDomain").val());
 	this.checkDomain('toDomain');
 	this.PopulateSiteMapList();
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.copyTo = function(){
 	$("#fromDomain").val($("#toDomain").val());
 	this.checkDomain('fromDomain');
 	this.PopulateSiteMapList();
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.switchDomains = function(){
@@ -550,6 +684,7 @@ ReDirectCheck.prototype.switchDomains = function(){
 	this.checkDomain('fromDomain');
 	this.checkDomain('toDomain');
 	this.PopulateSiteMapList();
+	this.PutInStorage();
 }
 
 ReDirectCheck.prototype.generate = function(){
@@ -573,7 +708,7 @@ ReDirectCheck.prototype.generate = function(){
 		}
 		// all from paths less than 4 characters long are considered substrings
 		if(this.lines[i].from.length < 5){
-			console.log(this.lines[i].from);
+			//console.log(this.lines[i].from);
 			substring = true;
 		}
 		//also check against sitemap
@@ -595,12 +730,26 @@ ReDirectCheck.prototype.generate = function(){
 
 }
 
+ReDirectCheck.prototype.report = function(){
+	//in case someone left them open
+	this.closeHelp();
+	this.helpOpen = false;
+	var innards = "From URL, From URL Status Code,To URL, To URL Status Code\n";
+	for(var i = 0; i < this.lines.length; ++i){
+		if(this.lines[i].deleted == true)
+			continue;
+		innards += $("#fromDomain").val() + this.lines[i].from + "," + this.lines[i].fromCode + "," + $("#toDomain").val() + this.lines[i].to + "," + this.lines[i].toCode + "\n";
+
+	}
+	$("#report").html("<pre>" + innards + "</pre>");
+}
+
 
 ReDirectCheck.prototype.csv = function(){
 	//in case someone left them open
 	this.closeHelp();
 	this.helpOpen = false;
-	var innards = "";
+	var innards = "From URL, To URL\n";
 	for(var i = 0; i < this.lines.length; ++i){
 		if(this.lines[i].deleted == true)
 			continue;
@@ -616,9 +765,10 @@ ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
 	var buffer = "";
   	var rewrite_cond = false;
 
-  	//remove opening slashes
-  	source_url = source_url.replace(/^\//,'');
-  	dest_url = dest_url.replace(/^\//,'');
+  	//remove opening slashes, escape pluses, spaces, and question marks
+  	source_url = source_url.replace(/^\//,'').replace(/[\+\?\s\(\)]/g, '\\$&');
+  	dest_url = dest_url.replace(/^\//,'').replace(/[\+\?\s\(\)]/g, '\\$&');
+
 
 	var GMindex = source_url.indexOf('?');
 	if ( GMindex >= 0 && source_url.slice((GMindex +1) , source_url.length).length > 0) {
@@ -626,15 +776,16 @@ ReDirectCheck.prototype.rewritesFor = function(source_url, dest_url){
 		rewrite_cond = true;
 		buffer += "\nRewriteCond %{QUERY_STRING} " + source_url.slice((GMindex +1) , source_url.length) + "\n";
 		buffer += "RewriteRule ^/?" + source_url.substring(0,GMindex);
-		buffer += " /" + dest_url + "? [R=301,L]\n\n";
+		if(dest_url.indexOf("http") == 0 )
+			buffer += " " + dest_url + "? [R=301,L]\n\n";
+		else
+			buffer += " /" + dest_url + "? [R=301,L]\n\n";
 	}else{
-		buffer += "RewriteRule ^/?" + source_url + " /" + dest_url + "? [R=301,L]\n";
+		if(dest_url.indexOf("http") == 0 )
+			buffer += "RewriteRule ^/?" + source_url + " " + dest_url + "? [R=301,L]\n";
+		else
+			buffer += "RewriteRule ^/?" + source_url + " /" + dest_url + "? [R=301,L]\n";
 	}
-
-	// Add query string from dest URL if there is one, else only a
-	// question mark to clear out the query tring
-	//match_dest += '?' + dest_url.replace(/^\?/,'');
-
 
 	return buffer;
 }
@@ -653,6 +804,7 @@ ReDirectCheck.prototype.toggleHelp = function(){
 
 ReDirectCheck.prototype.openHelp = function(){
 	$('#checktab').popover('show');
+	$('#reporttab').popover('show');
 	$('#csvtab').popover('show');
 	$('#gentab').popover('show');
 	$('#sortbutton').popover('show');
@@ -662,12 +814,13 @@ ReDirectCheck.prototype.openHelp = function(){
 	$('#toreloadbutton').popover('show');
 	$('#fromCell').popover('show');
 	$('#toCell').popover('show');
-	$('#downloadbutton').popover('show');
 	$('#clearbutton').popover('show');
+	$('#toggledev').popover('show');
 }
 
 ReDirectCheck.prototype.closeHelp = function(){
 	$('#checktab').popover('hide');
+	$('#reporttab').popover('hide');
 	$('#csvtab').popover('hide');
 	$('#gentab').popover('hide');
 	$('#sortbutton').popover('hide');
@@ -678,6 +831,7 @@ ReDirectCheck.prototype.closeHelp = function(){
 	$('#fromCell').popover('hide');
 	$('#toCell').popover('hide');
 	$('#clearbutton').popover('hide');
+	$('#toggledev').popover('hide');
 }
 
 
@@ -686,6 +840,7 @@ ReDirectCheck.prototype.PutInStorage = function(){
 	localStorage.lines = JSON.stringify(this.lines);
 	localStorage.from = $("#fromDomain").val();
 	localStorage.to = $("#toDomain").val();
+	//console.log("localStorage.to = " + localStorage.to);
 }
 
 ReDirectCheck.prototype.OpenStorage = function(){
@@ -693,6 +848,8 @@ ReDirectCheck.prototype.OpenStorage = function(){
 		this.lines = JSON.parse(localStorage.lines);
 		$("#fromDomain").val(localStorage.from);
 		$("#toDomain").val(localStorage.to);
+
+	//console.log("$(#toDomain).val() = " + $("#toDomain").val());
 		this.drawTable();
 	}
 }
@@ -704,4 +861,30 @@ ReDirectCheck.prototype.ClearStorage = function(){
 	RDC.drawTable();
 	$('#fromDomain').val("http://");
 	$('#toDomain').val("http://");
+}
+
+ReDirectCheck.prototype.devLink = function(id){
+	var oldurl;
+	var newurl;
+	oldurl = $("#"+id).val();
+
+	if( oldurl.indexOf(".dev") == -1){
+		newurl = oldurl.replace("www.", "").replace(/\.([a-z\.]{2,6})$/g,".dev").replace("https:", "http:");
+		if(id == "fromDomain"){
+			this.fromLiveURL = oldurl;
+			this.checkDomain('fromDomain');
+		}else if(id == "toDomain"){
+			this.toLiveURL = oldurl;
+			this.checkDomain('toDomain');
+		}
+	}else{
+		if(id == "fromDomain"){
+			newurl = this.fromLiveURL;
+			this.checkDomain('fromDomain');
+		}else if(id == "toDomain"){
+			newurl = this.toLiveURL;
+			this.checkDomain('toDomain');
+		}
+	}
+	$("#"+id).val(newurl);
 }

@@ -37,7 +37,7 @@ th.glyphButtonHolder span{
 }
 
 input.toFromInput{
-	width: 87%;
+	width: 82%;
 }
 
 input#toDomain{
@@ -81,4 +81,21 @@ button#fromreloadbutton, button#toreloadbutton{
 
 input::-webkit-calendar-picker-indicator {
   display: none;
+}
+
+/*styles for popovers */
+th#fromField div.top{
+	left: 485px  !important;
+}
+
+td#fromCellForm div.popover-content, th#toField div div.popover-content{
+	max-width: 300px  !important;
+}
+
+li.check div.popover, li.generate div.popover{
+	width: 145px;
+}
+
+div.popover-content{
+	font-weight: 400;
 }

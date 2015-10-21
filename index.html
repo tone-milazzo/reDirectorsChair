@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ReDirector's Chair (Beta)</title>
+    <title>ReDirector's Chair (Alpha)</title>
 
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -18,17 +18,20 @@
 </head>
 <body>
 	<div class="container">
-		<h1>ReDirector's Chair (Beta)</h1>
+		<h1>ReDirector's Chair (Alpha)</h1>
 			<h2>by Tone Milazzo</h2>
 		<!-- Nav tabs -->
 		<ul class="nav nav-tabs">
-			<li class="active">
+			<li class="active check">
 		  		<a id="checktab" href="#check" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="The tab you're on">Check</a>
 			 </li>
-			 <li>
+			 <li class="report">
+		  		<a id="reporttab" href="#report" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="bottom" data-content="Status Code Report">Report</a>
+		  	 </li>
+			 <li class="csv">
 		  		<a id="csvtab" href="#csv" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="bottom" data-content="Outputs as CSV">CSV</a>
 		  	 </li>
-			 <li>
+			 <li class="generate">
 		  		<a id="gentab" href="#generate" data-trigger="manual" data-toggle="tab" data-toggle="popover" data-placement="top" data-content="Generates the .htaccess rules">Generate</a>
 		  	 </li>
 		</ul>
@@ -45,22 +48,26 @@
 
 				<button id="helpbutton" title="Toggle Help" data-trigger="manual" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-book"></span></button>
 
-				<button id="clearbutton" title="Clear All" data-trigger="manual" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-remove"></span></button>
+				<button id="clearbutton" data-content="Clear All" data-trigger="manual" data-toggle="tooltip" data-placement="top" ><span class="glyphicon glyphicon-remove"></span></button>
 
 				<table class="table table-bordered">
 			  		<thead>
 			  			<tr><th class="removeButtonColumn"></th>
-					  		<th>
+					  		<th id="fromField">
 					  			from: <input class="toFromInput" id="fromDomain" type="url" list="fromList" value="http://" data-trigger="manual" data-toggle="popover" data-placement="top" data-content="Prefixes the paths in this column. If this field is red the URL is invalid, Green is good."/>
 					  			<datalist id="fromList">
 					  			</datalist>
+					  			<button onclick="RDC.devLink('fromDomain');" >
+					  				<span id="toggledev" class="glyphicon glyphicon-tree-deciduous glyphButton" data-content="Toggle local url" data-placement="bottom"></span>
+					  			</button>
+
 					  		</th>
 					  		<th class="glyphButtonHolder">
 					  			<button id="fromreloadbutton" type="button" data-trigger="manual" data-toggle="popover" data-placement="top" data-content="Press to test paths in this column.">
-					  				<span class="glyphicon glyphicon-refresh glyphButton" ></span>
+					  				<span class=" glyphicon glyphicon-refresh glyphButton"></span>
 					  			</button>
 					  		</th>
-					  		<th>
+					  		<th id="toField">
 					  			to: <input class="toFromInput" data-html="true" data-trigger="manual" data-toggle="tooltip"  id="toDomain" type="url" list="toList"  value="http://" data-toggle="popover" data-placement="top" data-content="Like from: RDC looks up the sitemap.xml from this URL and populates pulldown for the inputs in this column." />
 
 					  			<datalist id="toList">
@@ -68,6 +75,10 @@
 
 					  			<datalist id="sitemapList">
 					  			</datalist>
+					  			<button onclick="RDC.devLink('toDomain');" style="margin-left: 9px;">
+					  				<span class="glyphicon glyphicon-tree-deciduous glyphButton" ></span>
+					  			</button>
+
 					  		</th>
 					  		<th class="glyphButtonHolder">
 					  			<button id="toreloadbutton"  type="button" data-trigger="manual" data-toggle="popover" data-placement="bottom" data-content="Press to test paths in this column.">
@@ -81,7 +92,7 @@
 				  	<tbody id="formpart">
 				  		<tr>
 				  			<td></td>
-				  			<td>
+				  			<td id="fromCellForm">
 				  				<textarea autofocus id="fromCell" name="from" class="form-control" data-trigger="manual" data-toggle="popover" data-placement="bottom" data-content="When a URL is entered here RDC will trim the domain. If a single column of URLS are pasted here it will also parse them into seperate entries of from: urls. If two columns are pasted here it will parse them into seperate entries of from: and to: urls"></textarea>
 				  			</td>
 				  			</td>
@@ -96,19 +107,22 @@
 				  </table>
 
 		  	</div>
+		  	<div class="tab-pane" id="report">
+			</div>
 		  	<div class="tab-pane" id="csv">
 			</div>
 			<div class="tab-pane" id="generate">
 			</div>
 
 		</div>
+		<a href="demo.txt" target="_blank" style="float:right;">Demo file</a>
 	</div>
 
 	<!-- jQuery -->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" ></script>
 
 	<!-- Latest compiled and minified JavaScript -->
-	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 	<script src="./js/generatecheck.js"></script>
 </body>
