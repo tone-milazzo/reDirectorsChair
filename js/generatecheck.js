@@ -125,6 +125,8 @@ function ReDirectCheck(){
 	//for toggling to dev link
 	this.fromLiveURL = "";
 	this.toLiveURL = "";
+	//for toggling group delete
+	this.deleteStart = null;
 }
 
 ReDirectCheck.prototype.FromCellChanged = function(){
@@ -136,9 +138,7 @@ ReDirectCheck.prototype.FromCellChanged = function(){
 	FCLines = FCValue.split('\n');
 	for( var i =0 ; i< FCLines.length ; ++i){
 		FCLines[i] = FCLines[i].split(/[\s,\t\n\r]/); //split tabs, commas or spaces
-		//TONE
 		this.AddLine(decodeURIComponent(FCLines[i][0]), decodeURIComponent(FCLines[i][1]));
-		//this.AddLine(FCLines[i][0], FCLines[i][1]);
 	}
 	this.drawTable();
 	$("#fromCell").val("");
@@ -236,7 +236,7 @@ ReDirectCheck.prototype.drawTable = function(){
 
 	for(var i = 0; i< this.lines.length; ++i){
 		tableInnerds += '<tr title="' + i + '" id="row' + i + '" data-html="true" data-toggle="tooltip" data-placement="left">' +
-		'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ');"></span></td>' +
+		'<td class="removeButtonColumn"><span class="glyphicon glyphicon-minus glyphButton delete" onclick="RDC.deleteRow(' + i + ', event);"></span></td>' +
 		'<td class="removable"><input name="from" class="form-control from" type="text" value="' + this.lines[i].from + '" onkeyup="RDC.updateFrom(' + i + ', this);" onchange="RDC.updateFrom(' + i + ', this);">' +
 		'<span class="glyphicon glyphicon-link glyphButton" onclick="RDC.openInNewPage(' + i + ', \'from\');"></span>' +
 		'</td><td id="fromcode' + i + '" class="removable"></td>' +
@@ -249,7 +249,7 @@ ReDirectCheck.prototype.drawTable = function(){
 	table.innerHTML = tableInnerds;
 	$("#fromCell").focus();
 	//loop again to delete rows
-	for(var i = 0; i< this.lines.length; ++i){
+	for(var i = 0; i < this.lines.length; ++i){
 		//console.log( "loop to delete rows " + i + " = "+this.lines[i].deleted);
 		if(this.lines[i].deleted == true)
 			this.deleteRow(i);
@@ -257,36 +257,83 @@ ReDirectCheck.prototype.drawTable = function(){
 }
 
 
-ReDirectCheck.prototype.deleteRow = function(index){
-	//console.log( "delete row " + index);
-	this.lines[index].deleted = true;
-	$("#row" + index).children("td.removable").css("display","none");
-	$("#row" + index).css("height","10px");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").removeClass("glyphicon-minus").removeClass("delete").addClass("glyphicon-plus");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-plus").attr("onclick","RDC.restoreRow("+index+")");
-	//popover
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-toggle","popover");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-placement","right");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-trigger","hover");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-content",this.lines[index].from);
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('enable');
-	this.PutInStorage();
+ReDirectCheck.prototype.deleteRow = function(index, event){
+	//tone
+	if((typeof event !== 'undefined') && event.shiftKey){
+		$("#row" + index).addClass("alert-info");
+		if(this.deleteStart == null){
+			this.deleteStart = index;
+		}else if(this.deleteStart == index){
+			$("#row" + index).removeClass("alert-info");
+			this.deleteStart = null;
+		}else{
+			if(this.deleteStart < index){
+				for( var i = this.deleteStart; i<=index; ++i){
+					this.deleteRow(i);
+					$("#row" + i).removeClass("alert-info");
+				}
+				this.deleteStart = null;
+			}else if(this.deleteStart > index){
+				for( var i = index; i<=this.deleteStart; ++i){
+					this.deleteRow(i);
+					$("#row" + i).removeClass("alert-info");
+				}
+				this.deleteStart = null;
+			}
+		}
+	}else{
+		//console.log( "delete row " + index);
+		this.lines[index].deleted = true;
+		$("#row" + index).children("td.removable").css("display","none");
+		$("#row" + index).css("height","10px");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").removeClass("glyphicon-minus").removeClass("delete").addClass("glyphicon-plus");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-plus").attr("onclick","RDC.restoreRow("+index+",event)");
+		//popover
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-toggle","popover");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-placement","right");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-trigger","hover");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").attr("data-content",this.lines[index].from);
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('enable');
+		this.PutInStorage();
+	}
 }
 
-ReDirectCheck.prototype.restoreRow = function(index){
-	this.lines[index].deleted = false;
-	$("#row" + index).children("td.removable").css("display","table-cell");
-	$("#row" + index).css("height","51px");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-plus").addClass("glyphicon-minus").addClass("delete").removeClass("glyphicon-plus");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").attr("onclick","RDC.deleteRow("+index+")");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").attr("id","");
-	//popover
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-toggle");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-placement");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-trigger");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-content");
-	$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('disable');
-	this.PutInStorage();
+ReDirectCheck.prototype.restoreRow = function(index, event){
+	//tone
+	if((typeof event !== 'undefined') && event.shiftKey){
+		$("#row" + index).addClass("alert-info");
+		if(this.deleteStart == null){
+			this.deleteStart = index;
+		}else{
+			if(this.deleteStart < index){
+				for( var i = this.deleteStart; i<=index; ++i){
+					this.restoreRow(i);
+					$("#row" + i).removeClass("alert-info");
+				}
+				this.deleteStart = null;
+			}else{
+				for( var i = index; i<=this.deleteStart; ++i){
+					this.restoreRow(i);
+					$("#row" + i).removeClass("alert-info");
+				}
+				this.deleteStart = null;
+			}
+		}
+	}else{
+		this.lines[index].deleted = false;
+		$("#row" + index).children("td.removable").css("display","table-cell");
+		$("#row" + index).css("height","51px");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-plus").addClass("glyphicon-minus").addClass("delete").removeClass("glyphicon-plus");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").attr("onclick","RDC.deleteRow("+index+",event)");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon-minus").attr("id","");
+		//popover
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-toggle");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-placement");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-trigger");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").removeAttr("data-content");
+		$("#row" + index).children("td.removeButtonColumn").children("span.glyphicon").popover('disable');
+		this.PutInStorage();
+	}
 }
 
 ReDirectCheck.prototype.addURL = function(toOrFrom, url){
@@ -638,28 +685,37 @@ ReDirectCheck.prototype.PopulateSiteMapList = function(){
 
 
 ReDirectCheck.prototype.sortTable = function(){
+	this.lines.sort( function(a,b){
+		var A = a.from.toUpperCase();
+		var B = b.from.toUpperCase();
+		if(A < B) {
+		    return -1;
+		}
+		if(A > B) {
+	    	return 1;
+		}
+		return 0;
+	});
+	this.drawTable();
+
+	  /* This code used to sort the table w/o sorting the data
 	  var rows = $('#tableBody tr').get();
 
 	  rows.sort(function(a, b) {
-
-	  var A = $(a).children('td').eq(1).children('input').val().toUpperCase();
-	  var B = $(b).children('td').eq(1).children('input').val().toUpperCase();
-
-	  if(A < B) {
-	    return -1;
-	  }
-
-	  if(A > B) {
-	    return 1;
-	  }
-
-	  return 0;
-
+		  var A = $(a).children('td').eq(1).children('input').val().toUpperCase();
+		  var B = $(b).children('td').eq(1).children('input').val().toUpperCase();
+		  if(A < B) {
+		    return -1;
+		  }
+		  if(A > B) {
+		    return 1;
+		  }
+		  return 0;
 	  });
 
 	  $.each(rows, function(index, row) {
 	    $('#tableBody').append(row);
-	  });
+	  });*/
 }
 
 
@@ -721,9 +777,9 @@ ReDirectCheck.prototype.generate = function(){
 			}
 		}
 		if(substring == false){
-			innards += this.rewritesFor(this.lines[i].from, this.lines[i].to);
+			innards += this.rewritesFor(this.lines[i].from.trim(), this.lines[i].to.trim());
 		}else{
-			innards += this.rewritesFor(this.lines[i].from + "$", this.lines[i].to);
+			innards += this.rewritesFor(this.lines[i].from.trim() + "$", this.lines[i].to.trim());
 		}
 	}
 	$("#generate").html("<pre>" + innards + "</pre>");
